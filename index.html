@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>SYSTEM TIMER</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#f8fafc">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+  <!-- top left menu (settings) -->
+  <button id="menuBtn" class="menu-corner" title="Settings">☰</button>
+  <!-- bottom right help -->
+  <button id="helpBtn" class="help-corner" title="User Guide">❓</button>
+
+  <div class="app">
+    <!-- custom name (change in settings) -->
+    <div id="customLabel" class="custom-label">My Timer</div>
+
+    <!-- small prep timer (hidden initially) -->
+    <div id="prepTimerDisplay" class="prep-timer-display" style="display: none;">⏳ Prep: 00:00:00</div>
+
+    <!-- main timer display -->
+    <div class="timer">
+      <span class="timer-hours">00</span><span class="timer-colon">:</span>
+      <span class="timer-minutes">00</span><span class="timer-colon">:</span>
+      <span class="timer-seconds">00</span>
+    </div>
+    <div class="timer-units">
+      <span class="unit">HOURS</span>
+      <span class="unit">MINUTES</span>
+      <span class="unit">SECONDS</span>
+    </div>
+
+    <!-- prep indicator (text) -->
+    <div id="prepIndicator" class="prep-indicator" style="display: none;">⏳ Preparing...</div>
+
+    <!-- traffic light -->
+    <div class="traffic-light">
+      <div class="light green active"></div>
+      <div class="light yellow"></div>
+      <div class="light red"></div>
+    </div>
+
+    <!-- main controls (icons) -->
+    <div class="controls">
+      <button id="startPauseBtn" title="Start / Pause">▶</button>
+      <button id="resetBtn" title="Reset">⟳</button>
+    </div>
+  </div>
+
+  <!-- fixed footer hotkey note -->
+  <div class="hotkey-footer">
+    ⌨️ Hotkeys: <kbd>Space</kbd> Start/Pause · <kbd>R</kbd> Reset · <kbd>S</kbd> Settings · <kbd>E</kbd> Add Event
+  </div>
+
+  <!-- ========== MODALS ========== -->
+
+  <!-- settings modal -->
+  <div id="settingsModal" class="modal">
+    <div class="modal-content">
+      <h3>⚙️ Timer Settings</h3>
+      <div class="settings-field">
+        <label>Timer name:</label>
+        <input type="text" id="customLabelInput" maxlength="30" placeholder="My Timer">
+      </div>
+      <div class="settings-buttons">
+        <button id="setTimeBtn">⏱️ Set Time</button>
+        <div class="mode-radio">
+          <label><input type="radio" name="countMode" value="down" checked> Descending</label>
+          <label><input type="radio" name="countMode" value="up"> Ascending</label>
+        </div>
+        <div class="continue-option">
+          <label><input type="checkbox" id="continueDescending"> Continue descending past zero</label>
+        </div>
+        <div class="prep-time-group">
+          <label>⏰ Preparation time (before main timer):</label>
+          <div class="prep-inputs">
+            <div class="input-unit"><input type="number" id="prepHours" min="0" max="99" value="0" step="1"><span>hours</span></div>
+            <div class="input-unit"><input type="number" id="prepMinutes" min="0" max="59" value="0" step="1"><span>minutes</span></div>
+            <div class="input-unit"><input type="number" id="prepSeconds" min="0" max="59" value="0" step="1"><span>seconds</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="events-header">
+        <hr>
+        <h4>🚦 Traffic Light Events</h4>
+        <button id="addEventBtn" class="small-btn">+ Add Event</button>
+      </div>
+      <div id="eventsList" class="events-list"></div>
+      <div class="modal-buttons">
+        <button id="closeSettingsBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- set time modal -->
+  <div id="timeModal" class="modal">
+    <div class="modal-content">
+      <h3>Set Timer</h3>
+      <div class="time-input-group">
+        <div class="input-unit"><input type="number" id="modalHours" min="0" max="99" value="0" step="1"><span>hours</span></div>
+        <div class="input-unit"><input type="number" id="modalMinutes" min="0" max="59" value="1" step="1"><span>minutes</span></div>
+        <div class="input-unit"><input type="number" id="modalSeconds" min="0" max="59" value="0" step="1"><span>seconds</span></div>
+      </div>
+      <div class="modal-buttons"><button id="modalConfirmBtn">Set Timer</button><button id="modalCancelBtn">Cancel</button></div>
+    </div>
+  </div>
+
+  <!-- add traffic light event modal -->
+  <div id="eventModal" class="modal">
+    <div class="modal-content">
+      <h3>Add Traffic Light Event</h3>
+      <div class="time-input-group">
+        <div class="input-unit"><input type="number" id="eventHours" min="0" value="0" step="1"><span>hours</span></div>
+        <div class="input-unit"><input type="number" id="eventMinutes" min="0" value="0" step="1"><span>minutes</span></div>
+        <div class="input-unit"><input type="number" id="eventSeconds" min="0" max="59" value="0" step="1"><span>seconds</span></div>
+      </div>
+      <div style="margin: 1rem 0;">
+        <label style="margin-right: 1rem;"><input type="radio" name="eventColor" value="green" checked> 🟢 Green</label>
+        <label style="margin-right: 1rem;"><input type="radio" name="eventColor" value="yellow"> 🟡 Yellow</label>
+        <label><input type="radio" name="eventColor" value="red"> 🔴 Red</label>
+      </div>
+      <div class="modal-buttons">
+        <button id="eventConfirmBtn">Add Event</button>
+        <button id="eventCancelBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- help modal -->
+  <div id="helpModal" class="modal">
+    <div class="modal-content" style="max-width: 500px; text-align: left;">
+      <h3 style="text-align: center;">📘 Timer Guide</h3>
+      <div style="margin-top: 1rem;">
+        <p><strong>▶ / ⏸</strong> – Start / Pause (spacebar).</p>
+        <p><strong>⟳</strong> – Reset (R key).</p>
+        <p><strong>☰</strong> – Settings (S key).</p>
+        <p><strong>❓</strong> – Help.</p>
+        <p><strong>🚦 Events</strong> – add times (seconds) when traffic light changes colour.</p>
+        <p><strong>⏰ Preparation time</strong> – counts down first; after it ends, press Start again for main timer.</p>
+        <p><strong>✏️ Timer name</strong> – change in Settings.</p>
+      </div>
+      <div class="modal-buttons" style="margin-top: 1.5rem;">
+        <button id="closeHelpBtn" style="background:#0f172a; color:white;">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(registration => {
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // New worker is waiting, reload the page
+            window.location.reload();
+          }
+        });
+      });
+    });
+  }
+</script>
+</body>
+</html>
